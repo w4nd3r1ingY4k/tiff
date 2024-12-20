@@ -1,11 +1,12 @@
 {
   "name": "Tiff",
   "description": "An artifically intelligent agent specialized for increasing small business efficiency",
+  "beya": "Powered by Beya Inc.",
   "engines": {
     "node": ">=18"
   },
   "license": "MIT",
-  "version": "0.0.18",
+  "version": "1",
   "scripts": {
     "dev": "next -p 10000",
     "build": "next build",

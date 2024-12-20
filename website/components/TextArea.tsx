@@ -10,7 +10,7 @@ type TextAreaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
   autoPlaySpeedMS?: number;
   isBlink?: boolean;
 };
-function TextArea({ autoPlay, autoPlaySpeedMS = 40, isBlink, placeholder, onChange, ...rest }: TextAreaProps) {
+function TextArea({ autoPlay, autoPlaySpeedMS = 90000000000000, isBlink, placeholder, onChange, ...rest }: TextAreaProps) {
   const textAreaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const measurementRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -49,21 +49,24 @@ function TextArea({ autoPlay, autoPlaySpeedMS = 40, isBlink, placeholder, onChan
       autoPlayIndexRef.current = 0;
       setText('');
       if (autoPlayIntervalRef.current) clearInterval(autoPlayIntervalRef.current);
-
+  
       autoPlayIntervalRef.current = setInterval(() => {
         autoPlayIndexRef.current++;
-        if (!autoPlay) return;
         if (autoPlayIndexRef.current > autoPlay.length) {
           setIsAutoPlaying(false);
           clearInterval(autoPlayIntervalRef.current!);
           return;
         }
+  
+        // Batch updates to avoid rendering on every interval
         const newText = autoPlay.slice(0, autoPlayIndexRef.current);
-        setText(newText);
-        setSelectionStart(newText.length);
+        requestAnimationFrame(() => {
+          setText(newText);
+          setSelectionStart(newText.length);
+        });
       }, autoPlaySpeedMS);
     }
-
+  
     return () => {
       if (autoPlayIntervalRef.current) clearInterval(autoPlayIntervalRef.current);
     };

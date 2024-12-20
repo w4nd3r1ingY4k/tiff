@@ -17,8 +17,8 @@ function ModalCreateAccount() {
   const { close } = useModals();
 
   return (
-    <div className={styles.root}>
-      <CardDouble title="NEW ACCOUNT">
+    <div className={styles.root} style={{ position: 'absolute', zIndex: 1000 }}>
+      <CardDouble title="CREATE ACCOUNT">
         Create a new MakeBelieve™ account, where anything is possible at your command line in the browser.
         <br />
         <br />
