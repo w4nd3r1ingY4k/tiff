@@ -1,0 +1,96 @@
+```json
+{
+  "error": "Too many tasks requested. Only two tasks can be handled at once.",
+  "tasks": [
+    {
+      "session_id": "session_create_depop",
+      "action": "create_account",
+      "params": {
+        "struct": "create_depop",
+        "fields_needed": [
+          {
+            "field_name": "username",
+            "description": "The desired username for the Depop account.",
+            "status": "missing",
+            "provided_value": null
+          },
+          {
+            "field_name": "email",
+            "description": "A valid email address for the Depop account.",
+            "status": "missing",
+            "provided_value": null
+          },
+          {
+            "field_name": "phone_number",
+            "description": "The phone number associated with the Depop account.",
+            "status": "missing",
+            "provided_value": null
+          },
+          {
+            "field_name": "password",
+            "description": "A secure password for the Depop account.",
+            "status": "missing",
+            "provided_value": null
+          }
+        ]
+      },
+      "context_summary": null,
+      "clarification_prompt": null
+    },
+    {
+      "session_id": "session_create_etsy",
+      "action": "create_account",
+      "params": {
+        "struct": "create_etsy",
+        "fields_needed": [
+          {
+            "field_name": "username",
+            "description": "The desired username for the Etsy account.",
+            "status": "missing",
+            "provided_value": null
+          },
+          {
+            "field_name": "email",
+            "description": "A valid email address for the Etsy account.",
+            "status": "missing",
+            "provided_value": null
+          },
+          {
+            "field_name": "password",
+            "description": "A secure password for the Etsy account.",
+            "status": "missing",
+            "provided_value": null
+          }
+        ]
+      },
+      "context_summary": null,
+      "clarification_prompt": null
+    },
+    {
+      "session_id": "session_create_shopify",
+      "action": "create_account",
+      "params": {
+        "struct": "create_shopify",
+        "fields_needed": [
+          {
+            "field_name": "email",
+            "description": "A valid email address for the Shopify store account.",
+            "status": "missing",
+            "provided_value": null
+          },
+          {
+            "field_name": "password",
+            "description": "A secure password for the Shopify store account.",
+            "status": "missing",
+            "provided_value": null
+          }
+        ]
+      },
+      "context_summary": null,
+      "clarification_prompt": null
+    }
+  ],
+  "context_summary": "User requested three tasks: Depop account creation, Etsy account creation, and Shopify store creation. Only two can be handled at once.",
+  "clarification_prompt": "You’ve requested three separate actions (Depop, Etsy, and Shopify), but I can only handle two at once. Please choose which two you’d like to proceed with."
+}
+```
