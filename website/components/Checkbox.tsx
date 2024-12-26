@@ -8,13 +8,14 @@ interface CheckboxProps {
   style?: React.CSSProperties;
   checkboxStyle?: React.CSSProperties;
   name: string;
+  checked?: boolean; // Add this property
   defaultChecked?: boolean;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   tabIndex?: number;
   children?: React.ReactNode;
 }
 
-const Checkbox: React.FC<CheckboxProps> = ({ style, name, defaultChecked = false, onChange, children }) => {
+const Checkbox: React.FC<CheckboxProps> = ({ style, name, defaultChecked = false, onChange, children, checked }) => {
   const checkboxId = `${name}-checkbox`;
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -66,7 +67,18 @@ const Checkbox: React.FC<CheckboxProps> = ({ style, name, defaultChecked = false
       style={style}
     >
       <div className={styles.relative}>
-        <input className={styles.input} id={checkboxId} type="checkbox" name={name} defaultChecked={defaultChecked} onChange={handleChange} onKeyDown={handleKeyDown} onFocus={handleFocus} onBlur={handleBlur} tabIndex={0} ref={inputRef} />
+        <input 
+        className={styles.input} 
+        id={checkboxId} type="checkbox"
+        checked={checked !== undefined ? checked : isChecked} // Controlled vs uncontrolled behavior
+        name={name} 
+        defaultChecked={defaultChecked} 
+        onChange={handleChange} 
+        onKeyDown={handleKeyDown} 
+        onFocus={handleFocus} 
+        onBlur={handleBlur} 
+        tabIndex={0} 
+        ref={inputRef} />
         <label className={styles.figure} htmlFor={checkboxId}>
           {isChecked ? '╳' : '\u00A0'}
         </label>

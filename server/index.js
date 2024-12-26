@@ -20,7 +20,16 @@ app.use(cors());
 
 // In-memory store of messages
 let messages = [];
-
+let users = [
+  {
+    firstName: "Alice",
+    lastName: "Smith",
+    email: "alice@example.com",
+    password: "password123",
+    phoneNumber: "1234567890",
+    username: "alice123",
+  },
+];
 const apiKey = "AIzaSyA9NbS_W-UhqRSr-EMrjd1xQgnHmtIeT0U"; 
 const genAI = new GoogleGenerativeAI(apiKey);
 
@@ -43,7 +52,19 @@ const generationConfig = {
 
 // Root route
 app.get("/", (req, res) => {
-  res.send("Tiff server is running! Use POST /process-context to send a message.");
+  let html = "<h1>Signed Up Users</h1>";
+
+  if (users.length === 0) {
+    html += "<p>No users have signed up yet.</p>";
+  } else {
+    html += "<ul>";
+    users.forEach((user, index) => {
+      html += `<li>User ${index + 1}: ${JSON.stringify(user)}</li>`;
+    });
+    html += "</ul>";
+  }
+
+  res.send(html); // Send a single HTML response
 });
 
 // GET /process-context => list stored messages
@@ -91,7 +112,23 @@ app.post("/process-context", async (req, res) => {
     res.status(500).json({ error: "Error calling Gemini model" });
   }
 });
+app.post("/signup", async (req, res) => {
+  const { firstName, lastName, email, password, phoneNumber, username } = req.body;
 
+  if (!firstName || !lastName || !email || !password || !phoneNumber || !username) {
+    return res.status(400).json({ error: "All fields are required." });
+  }
+
+  // Add user to the in-memory array
+  const userData = { firstName, lastName, email, password, phoneNumber, username };
+  users.push(userData);
+
+  // Log the user data to the console
+  console.log("New User Data:", userData);
+
+  // Send a success response
+  res.json({ message: "User signed up successfully!", user: userData });
+});
 app.post("/headless-test", async (req, res) => {
   puppeteer.use(StealthPlugin())
   try {
