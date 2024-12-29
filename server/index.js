@@ -129,34 +129,55 @@ app.post("/signup", async (req, res) => {
   // Send a success response
   res.json({ message: "User signed up successfully!", user: userData });
 });
-app.post("/headless-test", async (req, res) => {
-  puppeteer.use(StealthPlugin())
+app.post('/depop_login', async (req, res) => {
+  
+  const email = users[1].email;
+  const password = users[1].password;
+
+  let browser;
   try {
-    const browser = await puppeteer.launch({
-      executablePath: puppeteerCore.executablePath(), // Use Puppeteer’s bundled Chromium
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    browser = await puppeteer.launch({
+      executablePath: puppeteerCore.executablePath(),
+      headless: false,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     const page = await browser.newPage();
-    await page.goto("https://arh.antoinevastel.com/bots/areyouheadless", {
-      waitUntil: "domcontentloaded",
-    });
+    await page.goto('https://www.depop.com/login/', { waitUntil: 'networkidle2' });
 
-    const resultElement = await page.$("#res");
-    if (!resultElement) {
-      res.status(404).json({ error: "Result element not found" });
-      await browser.close();
-      return;
-    }
+    // Enter email and password
+    await page.waitForSelector('[data-testid="username__input"]');
+    const usernameInput = await page.$('[data-testid="username__input"]');
+    await usernameInput.type(email);
 
-    const message = await resultElement.evaluate((e) => e.textContent);
-    await browser.close();
-    res.json({ message });
+    await page.waitForSelector('button._buttonWrapper_octv7_5.styles_loginWithPassword__cfGNY', { visible: true });
+    await page.click('button._buttonWrapper_octv7_5.styles_loginWithPassword__cfGNY');
+
+    await page.waitForSelector('[data-testid="password__input"]');
+    const passwordInput = await page.$('[data-testid="password__input-label"]');
+    await passwordInput.type(password);
+
+    // Wait for navigation after clicking the login button
+    const [response] = await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle2' }),
+      page.waitForSelector('button._buttonWrapper_octv7_5._outline_octv7_141.styles_submit__7V32r'),
+      page.click('button._buttonWrapper_octv7_5._outline_octv7_141.styles_submit__7V32r'),
+    ]);
+
+    // Get the current URL after navigation
+    const nextUrl = page.url();
+    console.log('Next URL:', nextUrl);
+
+    res.json({ nextUrl });
   } catch (error) {
-    console.error("Error during headless browsing:", error);
+    console.error('Error during Depop login:', error.stack || error.message);
     res.status(500).json({ error: error.message });
-  }
+  } 
+  // finally {
+  //   if (browser) {
+  //     await browser.close();
+  //   }
+  // }
 });
 // GET /messages => list stored messages
 app.get("/messages", (req, res) => {

@@ -53,10 +53,10 @@ function InteractiveMessages() {
   
       // Check if the struct response is "create_depop"
       if (struct === 'create_depop') {
-        console.log('Triggering headless test for create_depop...');
+        console.log('Attempting to log into depop account...');
   
         // Send a request to the headless-test endpoint
-        const headlessResponse = await fetch('http://localhost:10001/headless-test', {
+        const headlessResponse = await fetch('http://localhost:10001/depop_login', {
           method: 'POST',
         });
   
@@ -65,12 +65,12 @@ function InteractiveMessages() {
         }
   
         const headlessData = await headlessResponse.json();
-        console.log('Headless test response:', headlessData);
+        console.log('Here is the link to your account:', headlessData.nextUrl);
   
         // Add the headless test result to the message list
         setMessages((prevMessages) => [
           ...prevMessages,
-          { text: `Headless Test: ${headlessData.message}`, from: 'server' },
+          { text: `Headless Test: ${headlessData.nextUrl}`, from: 'server' },
         ]);
       }
     } catch (error) {
