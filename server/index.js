@@ -24,10 +24,11 @@ let users = [
   {
     firstName: "Akbar",
     lastName: "Shamji",
-    email: "akbar.shamjijr@gmail.com",
+    email: "akbar.shamjijr_test@gmail.com",
     password: "Alvarez2074!",
     phoneNumber: "7865856283",
-    username: "akbarshamjijr",
+    username: "akbarshamjijr_test",
+    code: "0000"
   },
 ];
 
@@ -265,6 +266,11 @@ app.get("/", (req, res) => {
   res.send(html);
 });
 
+app.get("/say-hi", (req, res) => {
+  console.log("Hi");
+  res.send("Hi");
+});
+
 // GET /process-context => list stored messages
 app.get("/process-context", (req, res) => {
   res.json({ messages });
@@ -294,6 +300,25 @@ app.post("/process-context", async (req, res) => {
     console.error("Error calling Gemini model:", error.message);
     res.status(500).json({ error: "Error calling Gemini model" });
   }
+});
+
+app.post("/set-otp", (req, res) => {
+  const { code } = req.body; // Extract the OTP code from the request body
+
+  if (!code) {
+    return res.status(400).json({ error: "OTP code is required." });
+  }
+
+  if (!users[0]) {
+    return res.status(400).json({ error: "No users available to set OTP for." });
+  }
+
+  // Set the OTP code for users[0]
+  users[0].code = code;
+
+  console.log(`OTP code ${code} set for user:`, users[0]);
+
+  res.json({ message: `OTP code ${code} has been successfully set for user ${users[0].username}.`, user: users[0] });
 });
 
 // POST /signup
@@ -377,6 +402,96 @@ app.post("/depop_list_item", async (req, res) => {
   } catch (error) {
     console.error("Error during item listing:", error.message);
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/create_depop", async (req, res) => {
+  try {
+    console.log(users[0]);
+    await page.goto("https://www.depop.com/signup/email/", { waitUntil: "networkidle2" });
+    await page.waitForSelector('[data-testid="userDetails_firstName"]');
+    const first_name_input = await page.$('[data-testid="userDetails_firstName"]');
+    await first_name_input.click({ clickCount: 3 });
+    await first_name_input.type(users[0].firstName);
+
+    await page.waitForSelector('[data-testid="userDetails_lastName"]');
+    const last_name_input = await page.$('[data-testid="userDetails_lastName"]');
+    await last_name_input.click({ clickCount: 3 });
+    await last_name_input.type(users[0].lastName);
+
+    await page.waitForSelector('[data-testid="userDetails_email"]');
+    const username_input = await page.$('[data-testid="userDetails_username"]');
+    await username_input.click({ clickCount: 3 });
+    await username_input.type(users[0].username);
+
+    await page.waitForSelector('[data-testid="userDetails_email"]');
+    const email_input = await page.$('[data-testid="userDetails_email"]');
+    await email_input.click({ clickCount: 3 });
+    await email_input.type(users[0].email);
+
+    await page.waitForSelector('[data-testid="userDetails_password"]');
+    const password_input = await page.$('[data-testid="userDetails_password"]');
+    await password_input.click({ clickCount: 3 });
+    await password_input.type(users[0].password);
+  } catch (error) {
+    console.error("Error during account setup steps:", error.message);
+    res.status(500).json({ error: "Failed to complete the account setup steps." });
+    return; // Exit to prevent further execution
+  }
+
+  // Separate try-catch for button click
+  try {
+    await page.waitForSelector('.styles_submitButton__b5POn');
+    await page.click('.styles_submitButton__b5POn');
+    await page.waitForFunction('window.location.href === "https://www.depop.com/signup/phone/"',
+      {timeout: 3000}
+    );
+    res.json({ message: "Successful progression to OTP" });
+  } catch (error) {
+    console.error("Error during submit button click:", error.message);
+    res.status(500).json({ error: "Failed to click the submit button." });
+  }
+
+  try {
+    await page.waitForSelector('#downshift-\\:Rnnnfauhbqla\\:-input');
+  
+    // Triple-click to select the current value
+    const dropdownInput = await page.$('#downshift-\\:Rnnnfauhbqla\\:-input');
+    await dropdownInput.click({ clickCount: 3 }); 
+    await dropdownInput.press('Backspace'); // Clear existing value
+  
+    // Click toggle to open the dropdown
+    await page.waitForSelector('button#downshift-\\:Rnnnfauhbqla\\:-toggle-button');
+    await page.click('button#downshift-\\:Rnnnfauhbqla\\:-toggle-button');
+  
+    // Wait for dropdown list to appear
+    await page.waitForSelector('ul#downshift-\\:Rnnnfauhbqla\\:-menu');
+  
+    // Type '1' after clearing
+    await dropdownInput.type('1');
+  
+    // Now wait for the "United States (+1)" option to appear
+    // (in the new DOM you shared, it's item-1, not item-3)
+    await page.waitForSelector('#downshift-\\:Rnnnfauhbqla\\:-item-1 div._optionItemTextContainer_y8ug8_45');
+    await page.click('#downshift-\\:Rnnnfauhbqla\\:-item-1 div._optionItemTextContainer_y8ug8_45');
+  
+    console.log('Successfully selected United States (+1).');
+
+    await page.waitForSelector('#phoneNumber__input');
+
+// 2. Optionally clear the field by triple-click + Backspace (similar approach as before).
+const phoneInput = await page.$('#phoneNumber__input');
+await phoneInput.click({ clickCount: 3 });
+await phoneInput.press('Backspace');
+// 3. Type your desired phone number.
+await phoneInput.type('4012818762');
+// Wait for the submit button to appear in the DOM
+await page.waitForSelector('button._buttonWrapper_octv7_5.styles_phoneEntrySubmitButton__u78Js');
+// Click it
+await page.click('button._buttonWrapper_octv7_5.styles_phoneEntrySubmitButton__u78Js');
+  } catch (error) {
+    console.error("Error while selecting phone country code:", error.message);
+    res.status(500).json({ error: "Failed to select phone country code." });
   }
 });
 
