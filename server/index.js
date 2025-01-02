@@ -12,7 +12,7 @@ dotenv.config();
 
 // Initialize the app
 const app = express();
-const PORT = 10001;
+const PORT = 10007;
 
 // Middleware
 app.use(bodyParser.json());
@@ -22,12 +22,12 @@ app.use(cors());
 let messages = [];
 let users = [
   {
-    firstName: "Akbar",
-    lastName: "Shamji",
-    email: "akbar.shamjijr_test@gmail.com",
-    password: "Alvarez2074!",
+    firstName: "Alex",
+    lastName: "Perkins",
+    email: "PerkinsA9@gmail.com",
+    password: `qV{W4%d0:tic6)''%l)["I5)2nK+oV@1`,
     phoneNumber: "7865856283",
-    username: "akbarshamjijr_test",
+    username: "alexperkinsjeans",
     code: "0000"
   },
 ];
@@ -484,7 +484,7 @@ const phoneInput = await page.$('#phoneNumber__input');
 await phoneInput.click({ clickCount: 3 });
 await phoneInput.press('Backspace');
 // 3. Type your desired phone number.
-await phoneInput.type('4012818762');
+await phoneInput.type('4012818763');
 // Wait for the submit button to appear in the DOM
 await page.waitForSelector('button._buttonWrapper_octv7_5.styles_phoneEntrySubmitButton__u78Js');
 // Click it
@@ -493,7 +493,32 @@ await page.click('button._buttonWrapper_octv7_5.styles_phoneEntrySubmitButton__u
     console.error("Error while selecting phone country code:", error.message);
     res.status(500).json({ error: "Failed to select phone country code." });
   }
+
+  await page.waitForFunction('window.location.href === "https://www.depop.com/signup/phone-confirm/"', {timeout: 3000})
+
+  try {
+    // Wait for the code input to appear in the DOM
+    await page.waitForSelector('[data-testid="code__input"]');
+
+    // Grab the input element
+    const codeInput = await page.$('[data-testid="code__input"]');
+
+  
+    // Clear any existing text (optional, but often a good practice)
+    await codeInput.click({ clickCount: 3 });
+    await codeInput.press('Backspace');
+  
+    // Type the code from your user object
+    await codeInput.type("123456");
+  
+    console.log('Successfully entered the OTP code.');
+  } catch (error) {
+    console.error('Error entering the OTP code:', error.message);
+    // Handle the error (e.g., send a response, throw, etc.)
+  }
 });
+
+
 
 // GET /messages => list stored messages
 app.get("/messages", (req, res) => {
