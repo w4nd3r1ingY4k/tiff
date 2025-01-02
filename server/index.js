@@ -13,6 +13,7 @@ dotenv.config();
 // Initialize the app
 const app = express();
 const PORT = 10007;
+let code = '0000';
 
 // Middleware
 app.use(bodyParser.json());
@@ -22,12 +23,12 @@ app.use(cors());
 let messages = [];
 let users = [
   {
-    firstName: "Alex",
-    lastName: "Perkins",
-    email: "PerkinsA9@gmail.com",
-    password: `qV{W4%d0:tic6)''%l)["I5)2nK+oV@1`,
+    firstName: "martin",
+    lastName: "scorcese",
+    email: "realcinema1234@gmail.com",
+    password: "L1v3rCu43dL()L!!",
     phoneNumber: "7865856283",
-    username: "alexperkinsjeans",
+    username: "theseareclothesdude",
     code: "0000"
   },
 ];
@@ -303,9 +304,10 @@ app.post("/process-context", async (req, res) => {
 });
 
 app.post("/set-otp", (req, res) => {
-  const { code } = req.body; // Extract the OTP code from the request body
+  console.log("OTP HIT");
+  const { otp_code } = req.body; // Extract the OTP code from the request body
 
-  if (!code) {
+  if (!otp_code) {
     return res.status(400).json({ error: "OTP code is required." });
   }
 
@@ -314,11 +316,11 @@ app.post("/set-otp", (req, res) => {
   }
 
   // Set the OTP code for users[0]
-  users[0].code = code;
+  users[0].code = otp_code;
 
-  console.log(`OTP code ${code} set for user:`, users[0]);
+  console.log(`OTP code ${otp_code} set for the 0th user:`);
 
-  res.json({ message: `OTP code ${code} has been successfully set for user ${users[0].username}.`, user: users[0] });
+  res.json({ message: `OTP code ${otp_code} has been successfully set for user ${users[0].username}.`, user: users[0] });
 });
 
 // POST /signup
@@ -444,7 +446,7 @@ app.post("/create_depop", async (req, res) => {
     await page.waitForSelector('.styles_submitButton__b5POn');
     await page.click('.styles_submitButton__b5POn');
     await page.waitForFunction('window.location.href === "https://www.depop.com/signup/phone/"',
-      {timeout: 3000}
+      {timeout: 6000}
     );
     res.json({ message: "Successful progression to OTP" });
   } catch (error) {
@@ -484,7 +486,7 @@ const phoneInput = await page.$('#phoneNumber__input');
 await phoneInput.click({ clickCount: 3 });
 await phoneInput.press('Backspace');
 // 3. Type your desired phone number.
-await phoneInput.type('4012818763');
+await phoneInput.type('5053561226');
 // Wait for the submit button to appear in the DOM
 await page.waitForSelector('button._buttonWrapper_octv7_5.styles_phoneEntrySubmitButton__u78Js');
 // Click it
@@ -494,27 +496,50 @@ await page.click('button._buttonWrapper_octv7_5.styles_phoneEntrySubmitButton__u
     res.status(500).json({ error: "Failed to select phone country code." });
   }
 
-  await page.waitForFunction('window.location.href === "https://www.depop.com/signup/phone-confirm/"', {timeout: 3000})
+  await page.waitForFunction('window.location.href === "https://www.depop.com/signup/phone-confirm/"', {timeout: 6000})
+  console.log("Waiting for OTP code...");
+  // Poll for the OTP code to be updated
+  const waitForOTP = async () => {
+    console.log("Starting to wait for OTP...");
+    const timeout = Date.now() + 60000; // Set a timeout of 60 seconds
+  
+    while (users[0].code === '0000') {
+      if (Date.now() > timeout) {
+        throw new Error("Timed out waiting for OTP.");
+      }
+      console.log(`Current OTP code: ${users[0].code}`);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Check every 1 second
+    }
+  };
+  await waitForOTP();
+  console.log("Received OTP:", users[0].code);
 
   try {
-    // Wait for the code input to appear in the DOM
-    await page.waitForSelector('[data-testid="code__input"]');
-
-    // Grab the input element
-    const codeInput = await page.$('[data-testid="code__input"]');
-
+    // Wait for the input field with the ID "code__input" to appear in the DOM
+    await page.waitForSelector('#code__input');
   
-    // Clear any existing text (optional, but often a good practice)
-    await codeInput.click({ clickCount: 3 });
-    await codeInput.press('Backspace');
+    // Select the input field
+    const otpInput = await page.$('#code__input');
   
-    // Type the code from your user object
-    await codeInput.type("123456");
+    // Click the input field to focus it
+    await otpInput.click({ clickCount: 3 });
+  
+    // Clear any existing text
+    await otpInput.press('Backspace');
+  
+    // Type the OTP code
+    await otpInput.type(users[0].code);
   
     console.log('Successfully entered the OTP code.');
+  
+    // Optionally, wait for the "Next" button and click it to proceed
+    await page.waitForSelector('button.styles_phoneConfirmSubmitButton__qbjMq');
+    const nextButton = await page.$('button.styles_phoneConfirmSubmitButton__qbjMq');
+    await nextButton.click();
+  
+    console.log('Successfully clicked the "Next" button.');
   } catch (error) {
-    console.error('Error entering the OTP code:', error.message);
-    // Handle the error (e.g., send a response, throw, etc.)
+    console.error('Error interacting with the OTP input field:', error.message);
   }
 });
 
