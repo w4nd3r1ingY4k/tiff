@@ -238,7 +238,7 @@ let page; // <--- Single global page instance
   try {
     browser = await puppeteer.launch({
       executablePath: puppeteerCore.executablePath(),
-      headless: true,
+      headless: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     console.log("Global Puppeteer browser launched");
